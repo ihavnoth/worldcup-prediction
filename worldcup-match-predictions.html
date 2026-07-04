@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>축구 점수 예상 대시보드</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Malgun Gothic', '맑은고딕', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 12px 8px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 550px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: center;
+        }
+        .header h1 { font-size: 18px; margin-bottom: 2px; font-weight: bold; }
+        .header p { font-size: 10px; opacity: 0.9; }
+        
+        /* 탭 스타일 */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            background: #f9f9f9;
+        }
+        .tab-button {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+        .tab-button:hover {
+            background: #f0f0f0;
+        }
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .content {
+            padding: 12px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* 누적 적립금 */
+        .gold-banner {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            padding: 15px;
+            text-align: center;
+            border-bottom: 2px solid #daa520;
+            margin: -12px -12px 12px -12px;
+        }
+        .gold-banner > div:first-child {
+            font-size: 12px;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        .gold-banner > div:nth-child(2) {
+            font-size: 24px;
+            font-weight: bold;
+            color: #d4af37;
+        }
+        .gold-banner > div:last-child {
+            font-size: 10px;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        .match-section {
+            padding: 0;
+        }
+        .match-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #333;
+            flex-wrap: wrap;
+        }
+        .flag { font-size: 18px; }
+        .result-badge {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: auto;
+        }
+        .result-badge.final {
+            background: #e8f4f8;
+            color: #0066cc;
+        }
+        .result-badge.prediction {
+            background: #f0f0f0;
+            color: #666;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+            font-size: 11px;
+        }
+        thead {
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            padding: 6px 4px;
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+            font-size: 10px;
+        }
+        td {
+            padding: 6px 4px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 11px;
+        }
+        tbody tr:hover { background: #fafafa; }
+        .team-name { text-align: left; font-weight: 500; }
+        .score { font-weight: bold; font-size: 11px; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            border-left: 3px solid #667eea;
+        }
+        .stat-value { 
+            font-size: 14px; 
+            font-weight: bold;
+            color: #667eea;
+            margin: 3px 0;
+        }
+        .stat-label { 
+            font-size: 9px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚽ 월드컵 점수 예상</h1>
+            <p>한국 국가대표팀 그룹 스테이지</p>
+        </div>
+
+        <!-- 탭 버튼 -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('match5')">5차전</button>
+            <button class="tab-button" onclick="switchTab('match4')">4차전</button>
+            <button class="tab-button" onclick="switchTab('match3')">3차전</button>
+            <button class="tab-button" onclick="switchTab('match2')">2차전</button>
+            <button class="tab-button" onclick="switchTab('match1')">1차전</button>
+        </div>
+
+        <!-- 5차전 -->
+        <div id="match5" class="tab-content active">
+            <div class="gold-banner">
+                <div>💰 예상 적립금</div>
+                <div>7만원</div>
+                <div>기준 시간: 2026-06-29 11:09:50</div>
+            </div>
+            <div class="content">
+                <div class="match-section">
+                    <div class="match-title">
+                        <span class="flag">🇵🇹 vs 🇪🇸</span>
+                        <span>포르투갈 vs 스페인 (5차전)</span>
+                        <span class="result-badge prediction">📅 예정</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>예상</th>
+                                <th>팀원</th>
+                                <th>결과</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="score">2:1</td>
+                                <td class="team-name">미정</td>
+                                <td style="color: #d9534f;">포르투갈승</td>
+                            </tr>
+                            <tr>
+                                <td class="score">1:1</td>
+                                <td class="team-name">미정</td>
+                                <td style="color: #f0ad4e;">무</td>
+                            </tr>
+                            <tr>
+                                <td class="score">1:0</td>
+                                <td class="team-name">미정</td>
+                                <td style="color: #d9534f;">포르투갈승</td>
+                            </tr>
+                            <tr>
+                                <td class="score">0:1</td>
+                                <td class="team-name">미정</td>
+                                <td style="color: #5cb85c;">스페인승</td>
+                            </tr>
+                            <tr>
+                                <td class="score">1:2</td>
+                                <td class="team-name">미정</td>
+                                <td style="color: #5cb85c;">스페인승</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-label">정확 예상</div>
+                            <div class="stat-value">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">100% 완료</div>
+                            <div class="stat-value">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4차전 -->
+        <div id="match4" class="tab-content">
+            <div class="gold-banner">
+                <div>💰 예상 적립금</div>
+                <div>21만원</div>
+                <div>기준 시간: 2026-06-29 11:09:50</div>
+            </div>
+            <div class="content">
+                <div class="match-section">
+                    <div class="match-title">
+                        <span class="flag">🇧🇷 vs 🇯🇵</span>
+                        <span>브라질 vs 일본 (4차전)</span>
+                        <span class="result-badge final">✓ 2:1 승</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>예상</th>
+                                <th>팀원</th>
+                                <th>결과</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="score">3:1</td>
+                                <td class="team-name">황의진, 김종호, 이승탁</td>
+                                <td style="color: #d9534f;">브라질승</td>
+                            </tr>
+                            <tr>
+                                <td class="score">2:0</td>
+                                <td class="team-name">박상욱</td>
+                                <td style="color: #d9534f;">브라질승</td>
+                            </tr>
+                            <tr style="background-color: #fffacd; border-left: 4px solid #ffd700;">
+                                <td class="score">2:1</td>
+                                <td class="team-name">이왕선 ⚽🏆✨</td>
+                                <td style="color: #d9534f;">브라질승</td>
+                            </tr>
+                            <tr>
+                                <td class="score">1:0</td>
+                                <td class="team-name">오용석</td>
+                                <td style="color: #d9534f;">브라질승</td>
+                            </tr>
+                            <tr>
+                                <td class="score">1:2</td>
+                                <td class="team-name">장준권</td>
+                                <td style="color: #5cb85c;">일본승</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-label">정확 예상</div>
+                            <div class="stat-value">1명</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">100% 완료</div>
+                            <div class="stat-value">✓</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3차전 -->
+        <div id="match3" class="tab-content">
+            <div class="gold-banner">
+                <div>💰 예상 적립금</div>
+                <div>14만원</div>
+                <div>기준 시간: 2026-06-29 11:09:50</div>
+            </div>
+            <div class="content">
+                <div class="match-section">
+                    <div class="match-title">
+                        <span class="flag">🇰🇷 vs 🇿🇦</span>
+                        <span>한국 vs 남아공 (3차전)</span>
+                        <span class="result-badge final">✓ 0:1 패</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>예상</th>
+                                <th>팀원</th>
+                                <th>결과</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="score">3:0</td>
+                                <td class="team-name">김종호, 이왕선</td>
+                                <td style="color: #5cb85c;">한국승</td>
+                            </tr>
+                            <tr>
+                                <td class="score">2:0</td>
+                                <td class="team-name">황의진, 이승탁</td>
+                                <td style="color: #5cb85c;">한국승</td>
+                            </tr>
+                            <tr>
+                                <td class="score">1:0</td>
+                                <td class="team-name">박상욱</td>
+                                <td style="color: #5cb85c;">한국승</td>
+                            </tr>
+                            <tr>
+                                <td class="score">1:1</td>
+                                <td class="team-name">오용석</td>
+                                <td style="color: #f0ad4e;">무</td>
+                            </tr>
+                            <tr>
+                                <td class="score">2:1</td>
+                                <td class="team-name">장준권</td>
+                                <td style="color: #5cb85c;">한국승</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-label">정확 예상</div>
+                            <div class="stat-value">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">100% 완료</div>
+                            <div class="stat-value">✓</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2차전 -->
+        <div id="match2" class="tab-content">
+            <div class="gold-banner">
+                <div>💰 예상 적립금</div>
+                <div>7만원</div>
+                <div>기준 시간: 2026-06-29 11:09:50</div>
+            </div>
+            <div class="content">
+                <div class="match-section">
+                    <div class="match-title">
+                        <span class="flag">🇰🇷 vs 🇲🇽</span>
+                        <span>한국 vs 멕시코 (2차전)</span>
+                        <span class="result-badge final">✓ 0:1 패</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>예상</th>
+                                <th>팀원</th>
+                                <th>결과</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="score">2:1</td>
+                                <td class="team-name">이승탁, 이왕선</td>
+                                <td style="color: #5cb85c;">한국승</td>
+                            </tr>
+                            <tr>
+                                <td class="score">1:2</td>
+                                <td class="team-name">황의진, 오용석, 장준권</td>
+                                <td style="color: #d9534f;">한국패</td>
+                            </tr>
+                            <tr>
+                                <td class="score">1:1</td>
+                                <td class="team-name">박상욱</td>
+                                <td style="color: #f0ad4e;">무</td>
+                            </tr>
+                            <tr>
+                                <td class="score">1:0</td>
+                                <td class="team-name">김종호</td>
+                                <td style="color: #5cb85c;">한국승</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-label">정확 예상</div>
+                            <div class="stat-value">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">100% 완료</div>
+                            <div class="stat-value">✓</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1차전 -->
+        <div id="match1" class="tab-content">
+            <div class="gold-banner">
+                <div>💰 예상 적립금</div>
+                <div>7만원</div>
+                <div>기준 시간: 2026-06-29 11:09:50</div>
+            </div>
+            <div class="content">
+                <div class="match-section">
+                    <div class="match-title">
+                        <span class="flag">🇰🇷 vs 🇨🇿</span>
+                        <span>한국 vs 체코 (1차전)</span>
+                        <span class="result-badge final">✓ 2:1 승</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>예상</th>
+                                <th>팀원</th>
+                                <th>결과</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="score">3:1</td>
+                                <td class="team-name">장준권</td>
+                                <td style="color: #5cb85c;">한국승</td>
+                            </tr>
+                            <tr>
+                                <td class="score">3:0</td>
+                                <td class="team-name">이승탁</td>
+                                <td style="color: #5cb85c;">한국승</td>
+                            </tr>
+                            <tr style="background-color: #fffacd; border-left: 4px solid #ffd700;">
+                                <td class="score">2:1</td>
+                                <td class="team-name">황의진 ⚽🏆✨, 오용석 ⚽🏆✨</td>
+                                <td style="color: #5cb85c;">한국승</td>
+                            </tr>
+                            <tr>
+                                <td class="score">2:0</td>
+                                <td class="team-name">박상욱, 김종호</td>
+                                <td style="color: #5cb85c;">한국승</td>
+                            </tr>
+                            <tr>
+                                <td class="score">0:1</td>
+                                <td class="team-name">이왕선</td>
+                                <td style="color: #d9534f;">한국패</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-label">정확 예상</div>
+                            <div class="stat-value">2명</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">100% 완료</div>
+                            <div class="stat-value">✓</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            // 모든 탭 콘텐츠 숨기기
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 모든 탭 버튼 비활성화
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // 선택된 탭 활성화
+            document.getElementById(tabId).classList.add('active');
+            
+            // 선택된 버튼 활성화
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
