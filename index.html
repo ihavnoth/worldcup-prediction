@@ -6,6 +6,81 @@
     <title>축구 점수 예상 대시보드</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* 비밀번호 입력 화면 */
+        .password-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .password-screen.hidden {
+            display: none;
+        }
+        .password-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 300px;
+            width: 90%;
+        }
+        .password-box h2 {
+            font-family: 'Malgun Gothic', '맑은고딕', sans-serif;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        .password-box input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 20px;
+            margin-bottom: 15px;
+            font-family: 'Malgun Gothic', '맑은고딕', sans-serif;
+            transition: border-color 0.3s;
+        }
+        .password-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .password-box button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Malgun Gothic', '맑은고딕', sans-serif;
+            transition: transform 0.2s;
+        }
+        .password-box button:hover {
+            transform: translateY(-2px);
+        }
+        .password-box button:active {
+            transform: translateY(0);
+        }
+        .error-message {
+            color: #d9534f;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+        .error-message.show {
+            display: block;
+        }
+        
         body { 
             font-family: 'Malgun Gothic', '맑은고딕', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -26,8 +101,8 @@
             padding: 12px;
             text-align: center;
         }
-        .header h1 { font-size: 18px; margin-bottom: 2px; font-weight: bold; }
-        .header p { font-size: 10px; opacity: 0.9; }
+        .header h1 { font-size: 24px; margin-bottom: 2px; font-weight: bold; }
+        .header p { font-size: 14px; opacity: 0.9; }
         
         /* 탭 스타일 */
         .tabs {
@@ -42,7 +117,7 @@
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 16px;
             font-weight: bold;
             color: #666;
             transition: all 0.3s;
@@ -76,17 +151,17 @@
             margin: -12px -12px 12px -12px;
         }
         .gold-banner > div:first-child {
-            font-size: 12px;
+            font-size: 16px;
             color: #333;
             margin-bottom: 3px;
         }
         .gold-banner > div:nth-child(2) {
-            font-size: 24px;
+            font-size: 30px;
             font-weight: bold;
             color: #d4af37;
         }
         .gold-banner > div:last-child {
-            font-size: 10px;
+            font-size: 13px;
             color: #666;
             margin-top: 8px;
         }
@@ -99,7 +174,7 @@
             align-items: center;
             gap: 8px;
             margin-bottom: 10px;
-            font-size: 13px;
+            font-size: 17px;
             font-weight: bold;
             color: #333;
             flex-wrap: wrap;
@@ -109,7 +184,7 @@
             display: inline-block;
             padding: 2px 7px;
             border-radius: 12px;
-            font-size: 10px;
+            font-size: 13px;
             font-weight: bold;
             margin-left: auto;
         }
@@ -125,7 +200,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 8px;
-            font-size: 11px;
+            font-size: 15px;
         }
         thead {
             background: #f5f5f5;
@@ -136,17 +211,17 @@
             text-align: center;
             font-weight: 600;
             color: #333;
-            font-size: 10px;
+            font-size: 14px;
         }
         td {
             padding: 6px 4px;
             text-align: center;
             border-bottom: 1px solid #f0f0f0;
-            font-size: 11px;
+            font-size: 15px;
         }
         tbody tr:hover { background: #fafafa; }
         .team-name { text-align: left; font-weight: 500; }
-        .score { font-weight: bold; font-size: 11px; }
+        .score { font-weight: bold; font-size: 15px; }
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -161,18 +236,28 @@
             border-left: 3px solid #667eea;
         }
         .stat-value { 
-            font-size: 14px; 
+            font-size: 18px; 
             font-weight: bold;
             color: #667eea;
             margin: 3px 0;
         }
         .stat-label { 
-            font-size: 9px;
+            font-size: 13px;
             color: #666;
         }
     </style>
 </head>
 <body>
+    <!-- 비밀번호 보호 화면 -->
+    <div id="passwordScreen" class="password-screen">
+        <div class="password-box">
+            <h2>🔐 접근 제한</h2>
+            <input type="password" id="passwordInput" placeholder="비밀번호를 입력하세요" onkeypress="if(event.key==='Enter') checkPassword()">
+            <button onclick="checkPassword()">입장</button>
+            <div id="errorMessage" class="error-message">비밀번호가 틀렸습니다</div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>⚽ 월드컵 점수 예상</h1>
@@ -506,6 +591,28 @@
     </div>
 
     <script>
+        // 비밀번호 설정 (간단한 비밀번호: 1601)
+        const CORRECT_PASSWORD = "1601";
+        
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value;
+            const errorMsg = document.getElementById('errorMessage');
+            
+            if (input === CORRECT_PASSWORD) {
+                document.getElementById('passwordScreen').classList.add('hidden');
+                errorMsg.classList.remove('show');
+            } else {
+                errorMsg.classList.add('show');
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+            }
+        }
+        
+        // 페이지 로드 시 비밀번호 입력에 포커스
+        window.addEventListener('load', function() {
+            document.getElementById('passwordInput').focus();
+        });
+        
         function switchTab(tabId) {
             // 모든 탭 콘텐츠 숨기기
             const contents = document.querySelectorAll('.tab-content');
