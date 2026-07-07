@@ -245,6 +245,54 @@
             font-size: 13px;
             color: #666;
         }
+        
+        /* 정확 예상 행 - 과하게 화려한 스타일 */
+        @keyframes shimmer {
+            0%, 100% { 
+                background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%);
+                box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 
+                            0 0 60px rgba(255, 215, 0, 0.5),
+                            inset 0 0 20px rgba(255, 255, 255, 0.3);
+            }
+            50% { 
+                background: linear-gradient(135deg, #ffed4e 0%, #ffd700 50%, #ffed4e 100%);
+                box-shadow: 0 0 40px rgba(255, 215, 0, 1), 
+                            0 0 80px rgba(255, 215, 0, 0.7),
+                            inset 0 0 30px rgba(255, 255, 255, 0.5);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        .perfect-guess {
+            animation: shimmer 1.5s ease-in-out infinite, pulse 2s ease-in-out infinite !important;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%) !important;
+            border-left: 6px solid #ff6b6b !important;
+            border-radius: 8px !important;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 
+                        0 0 60px rgba(255, 215, 0, 0.5),
+                        0 8px 20px rgba(0, 0, 0, 0.15) !important;
+            font-weight: bold !important;
+            position: relative;
+        }
+        
+        .perfect-guess td {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2),
+                        0 0 10px rgba(255, 215, 0, 0.4);
+            font-size: 14px !important;
+            font-weight: bold !important;
+            letter-spacing: 0.5px;
+        }
+        
+        .perfect-guess .team-name {
+            font-size: 15px !important;
+            color: #333;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.6),
+                        0 2px 4px rgba(0, 0, 0, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -284,7 +332,7 @@
                     <div class="match-title">
                         <span class="flag">🇵🇹 vs 🇪🇸</span>
                         <span>포르투갈 vs 스페인 (5차전)</span>
-                        <span class="result-badge prediction">📅 예정</span>
+                        <span class="result-badge final">✓ 0:1 패</span>
                     </div>
                     <table>
                         <thead>
@@ -310,10 +358,10 @@
                                 <td class="team-name">이승탁</td>
                                 <td style="color: #d9534f;">포르투갈승</td>
                             </tr>
-                            <tr>
+                            <tr class="perfect-guess">
                                 <td class="score">0:1</td>
-                                <td class="team-name">오용석</td>
-                                <td style="color: #5cb85c;">스페인승</td>
+                                <td class="team-name">오용석 👑✨🏆</td>
+                                <td style="color: #333;">스페인승</td>
                             </tr>
                             <tr>
                                 <td class="score">1:2</td>
@@ -330,11 +378,11 @@
                     <div class="stats">
                         <div class="stat-card">
                             <div class="stat-label">정확 예상</div>
-                            <div class="stat-value">-</div>
+                            <div class="stat-value">1명</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-label">100% 완료</div>
-                            <div class="stat-value">-</div>
+                            <div class="stat-value">✓</div>
                         </div>
                     </div>
                 </div>
@@ -374,10 +422,10 @@
                                 <td class="team-name">박상욱</td>
                                 <td style="color: #d9534f;">브라질승</td>
                             </tr>
-                            <tr style="background-color: #fffacd; border-left: 4px solid #ffd700;">
+                            <tr class="perfect-guess">
                                 <td class="score">2:1</td>
-                                <td class="team-name">이왕선 ⚽🏆✨</td>
-                                <td style="color: #d9534f;">브라질승</td>
+                                <td class="team-name">이왕선 👑✨🏆</td>
+                                <td style="color: #333;">브라질승</td>
                             </tr>
                             <tr>
                                 <td class="score">1:0</td>
@@ -561,10 +609,10 @@
                                 <td class="team-name">이승탁</td>
                                 <td style="color: #5cb85c;">한국승</td>
                             </tr>
-                            <tr style="background-color: #fffacd; border-left: 4px solid #ffd700;">
+                            <tr class="perfect-guess">
                                 <td class="score">2:1</td>
-                                <td class="team-name">황의진 ⚽🏆✨, 오용석 ⚽🏆✨</td>
-                                <td style="color: #5cb85c;">한국승</td>
+                                <td class="team-name">황의진 👑✨🏆, 오용석 👑✨🏆</td>
+                                <td style="color: #333;">한국승</td>
                             </tr>
                             <tr>
                                 <td class="score">2:0</td>
